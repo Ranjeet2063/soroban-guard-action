@@ -1,0 +1,44 @@
+name: 'Soroban Guard - Smart Contract Security & Gas CI'
+description: 'Automated WASM size, gas budget optimization, and security invariant auditor for Soroban smart contracts on Stellar.'
+author: 'Ranjeet Kumar Gupta'
+branding:
+  icon: 'shield'
+  color: 'purple'
+
+inputs:
+  contract_path:
+    description: 'Path to contract directory or target WASM folder (defaults to current directory).'
+    required: false
+    default: '.'
+  max_wasm_size_kb:
+    description: 'Maximum allowable WASM file size in KB before failing the build (default: 64).'
+    required: false
+    default: '64'
+  fail_on_security_warning:
+    description: 'Whether to fail the CI job if high-severity security anti-patterns are detected.'
+    required: false
+    default: 'false'
+  fail_on_size_exceeded:
+    description: 'Whether to fail the CI job if WASM size exceeds max_wasm_size_kb.'
+    required: false
+    default: 'true'
+  comment_on_pr:
+    description: 'Whether to post an automated PR comment report.'
+    required: false
+    default: 'true'
+  github_token:
+    description: 'GitHub token for PR comment status reporting (e.g. secrets.GITHUB_TOKEN).'
+    required: false
+    default: ''
+
+outputs:
+  wasm_size_kb:
+    description: 'Total analyzed WASM size in KB.'
+  security_warnings_count:
+    description: 'Total number of potential security issues detected.'
+  status:
+    description: 'Audit status: passed, warning, or failed.'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

@@ -1,0 +1,33 @@
+{
+  "name": "soroban-guard-action",
+  "version": "1.0.0",
+  "description": "Automated WASM size, gas budget, and security invariant CI auditor for Soroban smart contracts on Stellar",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.js"
+  },
+  "keywords": [
+    "soroban",
+    "stellar",
+    "smart-contracts",
+    "security",
+    "wasm",
+    "ci",
+    "github-action"
+  ],
+  "author": "Ranjeet Kumar Gupta",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^3.0.1",
+    "@actions/github": "^9.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@vercel/ncc": "^0.45.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
+  }
+}
