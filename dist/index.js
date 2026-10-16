@@ -20477,6 +20477,33 @@ function scanRustCodeForSorobanRisks(baseDir) {
           remediation: "Use `checked_add`, `checked_sub`, or `checked_mul` to safely handle arithmetic boundaries."
         });
       }
+      if (trimmed.includes("env.storage().temporary().set(") && (trimmed.toLowerCase().includes("balance") || trimmed.toLowerCase().includes("admin") || trimmed.toLowerCase().includes("owner") || trimmed.toLowerCase().includes("allowance") || trimmed.toLowerCase().includes("vault")) && !isTestFile) {
+        findings.push({
+          ruleId: "SOROBAN-STORAGE-02",
+          severity: "HIGH",
+          title: "Critical Asset/Ownership State in Temporary Storage",
+          description: "Temporary storage entries (`env.storage().temporary()`) are permanently deleted upon expiration without archival. Critical state like balances or owner keys must never use temporary storage.",
+          file: relPath,
+          line: lineNum,
+          snippet: trimmed,
+          remediation: "Use `env.storage().persistent()` or `env.storage().instance()` with explicit `extend_ttl` for state that must be preserved."
+        });
+      }
+      if ((trimmed.includes(".transfer(&") || trimmed.includes(".transfer_from(&")) && (trimmed.includes("token::Client") || trimmed.includes("client.transfer") || trimmed.includes("token_client.transfer")) && !isTestFile) {
+        const lookbackCode = lines.slice(Math.max(0, i - 25), i).filter((l) => !l.trim().startsWith("//") && !l.trim().startsWith("/*")).join("\n");
+        if (!lookbackCode.includes(".require_auth()") && !lookbackCode.includes(".require_auth_for_args(")) {
+          findings.push({
+            ruleId: "SOROBAN-SAC-01",
+            severity: "CRITICAL",
+            title: "Unchecked Cross-Contract Token Transfer",
+            description: "Token transfer invoked via Client without preceding caller authorization (`require_auth()`). External callers could execute unbacked asset transfers.",
+            file: relPath,
+            line: lineNum,
+            snippet: trimmed,
+            remediation: "Ensure `from.require_auth()` is invoked before executing any token client transfer."
+          });
+        }
+      }
     }
   }
   const criticalCount = findings.filter((f) => f.severity === "CRITICAL").length;

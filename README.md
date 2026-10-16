@@ -67,6 +67,34 @@ jobs:
 
 ---
 
+---
+
+## 🏛️ CI Pipeline Architecture
+
+```mermaid
+flowchart TD
+    PR[Developer Opens Pull Request / Push Commit] --> GitHubRunner[GitHub Actions Runner]
+    GitHubRunner --> Build[cargo build --target wasm32-unknown-unknown --release]
+    Build --> Guard[🛡️ Soroban Guard Action]
+    
+    subgraph "Soroban Guard Engine"
+        Guard --> WASM[📦 WASM Analyzer: Size & Bytecode Budget]
+        Guard --> Security[🔬 Security Auditor: Invariants, Auth & TTL Checks]
+        Guard --> Reporter[📊 Markdown PR Comment Generator]
+    end
+    
+    WASM --> CheckLimits{Within Budget?}
+    Security --> CheckInvariants{Zero Critical Violations?}
+    
+    CheckLimits -->|Pass| PRReport[Post / Update PR Audit Status]
+    CheckInvariants -->|Pass| PRReport
+    CheckLimits -->|Exceeded| FailCI[❌ Block PR Merge & Alert Team]
+    CheckInvariants -->|Violation| FailCI
+    PRReport --> GreenCI[🟢 100% Green CI Status Check]
+```
+
+---
+
 ## 📋 Action Inputs
 
 | Input | Description | Default | Required |
@@ -85,6 +113,8 @@ jobs:
 | Rule ID | Severity | Detection | Remediation |
 | :--- | :---: | :--- | :--- |
 | `SOROBAN-AUTH-01` | **CRITICAL** | State-mutating function missing `require_auth()` | Add `caller.require_auth()` before state modification |
+| `SOROBAN-SAC-01` | **CRITICAL** | Unchecked Cross-Contract Token Client transfer | Add `from.require_auth()` before calling `token::Client.transfer()` |
+| `SOROBAN-STORAGE-02` | **HIGH** | Critical asset/ownership state stored in `temporary()` | Use `persistent()` or `instance()` with explicit `extend_ttl()` |
 | `SOROBAN-TTL-01` | **HIGH** | Storage used without `extend_ttl()` | Call `env.storage().instance().extend_ttl()` |
 | `SOROBAN-MATH-01` | **HIGH** | Unchecked compound math on balance/supply | Use `checked_add()`, `checked_sub()`, `checked_mul()` |
 | `SOROBAN-PANIC-01` | **MEDIUM** | Direct `.unwrap()` / `.expect()` in contract logic | Use custom `#[contracterror]` enum with `Result<T, E>` |

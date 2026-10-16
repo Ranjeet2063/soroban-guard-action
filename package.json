@@ -1,6 +1,6 @@
 {
   "name": "soroban-guard-action",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Automated WASM size, gas budget, and security invariant CI auditor for Soroban smart contracts on Stellar",
   "main": "dist/index.js",
   "scripts": {

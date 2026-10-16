@@ -74,6 +74,39 @@ describe('Soroban Guard Test Suite', () => {
     expect(result.findings.some((f) => f.ruleId === 'SOROBAN-AUTH-01')).toBe(false);
   });
 
+  it('detects critical temporary storage misuse and unauthorized token transfer', () => {
+    const vulnerableTokenCode = `
+      use soroban_sdk::{contract, contractimpl, Address, Env, token};
+
+      #[contract]
+      pub struct TokenVault;
+
+      #[contractimpl]
+      impl TokenVault {
+          pub fn store_balance_insecure(env: Env, user: Address, balance: i128) {
+              env.storage().instance().extend_ttl(100, 1000);
+              // Insecure: storing critical user balance in temporary storage!
+              env.storage().temporary().set(&user, &balance);
+          }
+
+          pub fn payout_unauthorized(env: Env, token_address: Address, from: Address, to: Address, amount: i128) {
+              env.storage().instance().extend_ttl(100, 1000);
+              // Insecure: missing from.require_auth() before token transfer!
+              let client = token::Client::new(&env, &token_address);
+              client.transfer(&from, &to, &amount);
+          }
+      }
+    `;
+
+    fs.writeFileSync(path.join(TEST_DIR, 'lib.rs'), vulnerableTokenCode);
+
+    const result = scanRustCodeForSorobanRisks(TEST_DIR);
+
+    expect(result.findings.some((f) => f.ruleId === 'SOROBAN-STORAGE-02')).toBe(true);
+    expect(result.findings.some((f) => f.ruleId === 'SOROBAN-SAC-01')).toBe(true);
+    expect(result.criticalCount).toBeGreaterThan(0);
+  });
+
   it('correctly audits WASM file sizes and detects threshold breach', () => {
     const mockWasm = Buffer.alloc(100 * 1024); // 100 KB
     fs.writeFileSync(path.join(TEST_DIR, 'test_contract.wasm'), mockWasm);
