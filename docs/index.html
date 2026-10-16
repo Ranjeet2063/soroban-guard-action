@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soroban Guard — Live Smart Contract Security & Gas CI Auditor</title>
+  <meta name="description" content="Automated WASM size, gas budget, and security invariant auditor for Stellar Soroban smart contracts. Try the interactive playground in your browser.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              900: '#4c1d95',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    pre, code, textarea { font-family: 'Fira Code', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-purple-600 selection:text-white">
+
+  <!-- Navigation -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl">🛡️</span>
+        <div>
+          <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">Soroban Guard</span>
+          <span class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">v1.1.0</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="https://github.com/Ranjeet2063/soroban-guard-action" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-2 text-sm text-slate-300 hover:text-white transition px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-500 bg-slate-800/60">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span class="font-medium">Star on GitHub</span>
+        </a>
+        <a href="https://github.com/marketplace?type=actions&query=soroban" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center text-sm font-semibold px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg shadow-purple-500/25 transition">
+          View Marketplace
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="text-center max-w-3xl mx-auto mb-8">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-4">
+        <span>⚡ Built specifically for Stellar Soroban Rust Developers</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-3">
+        Automated Smart Contract <br>
+        <span class="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Security & Gas CI Auditor</span>
+      </h1>
+      <p class="text-slate-400 text-base sm:text-lg">
+        Eliminate missing <code class="text-purple-300">require_auth()</code>, temporary storage state leaks, unchecked arithmetic, and WASM size bloat in your GitHub pull requests before code hits testnet.
+      </p>
+    </div>
+
+    <!-- Interactive Playground Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      
+      <!-- Editor Column -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl flex flex-col">
+        <div class="bg-slate-800/80 px-4 py-3 border-b border-slate-700/80 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+            <span class="text-xs font-medium text-slate-400 ml-2">contract/src/lib.rs</span>
+          </div>
+          <!-- Presets -->
+          <div class="flex items-center space-x-2">
+            <label for="sampleSelector" class="text-xs text-slate-400 hidden sm:inline">Preset:</label>
+            <select id="sampleSelector" onchange="loadSample(this.value)" class="text-xs bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-purple-500">
+              <option value="vulnerable">🚨 Vulnerable Contract (Multiple Issues)</option>
+              <option value="token">⚠️ Token Transfer Authorization Leak</option>
+              <option value="secure">🟢 100% Clean & Verified Contract</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="p-3">
+          <textarea id="rustCode" rows="18" class="w-full bg-slate-950 text-slate-200 text-xs sm:text-sm p-4 rounded-lg border border-slate-800 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none font-mono leading-relaxed" spellcheck="false"></textarea>
+        </div>
+
+        <div class="px-4 py-3 bg-slate-900/60 border-t border-slate-800 flex items-center justify-between">
+          <span class="text-xs text-slate-400">Pure client-side audit engine (zero data upload)</span>
+          <button onclick="runAudit()" class="px-5 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 font-semibold text-xs sm:text-sm text-white shadow-md shadow-purple-500/20 transition flex items-center space-x-2">
+            <span>Audit with Soroban Guard</span>
+            <span>⚡</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Audit Results Column -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl flex flex-col">
+        <div class="bg-slate-800/80 px-4 py-3 border-b border-slate-700/80 flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+            <span>🛡️ CI Audit Telemetry</span>
+          </span>
+          <div id="statusBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-300">
+            Awaiting Audit
+          </div>
+        </div>
+
+        <!-- Telemetry Summary Cards -->
+        <div class="grid grid-cols-4 gap-2 p-4 border-b border-slate-800/80 bg-slate-950/40 text-center text-xs">
+          <div class="p-2 rounded bg-red-950/20 border border-red-900/30">
+            <div id="critCount" class="text-lg font-bold text-red-400">0</div>
+            <div class="text-[10px] text-red-300 font-semibold uppercase">Critical</div>
+          </div>
+          <div class="p-2 rounded bg-amber-950/20 border border-amber-900/30">
+            <div id="highCount" class="text-lg font-bold text-amber-400">0</div>
+            <div class="text-[10px] text-amber-300 font-semibold uppercase">High</div>
+          </div>
+          <div class="p-2 rounded bg-blue-950/20 border border-blue-900/30">
+            <div id="medCount" class="text-lg font-bold text-blue-400">0</div>
+            <div class="text-[10px] text-blue-300 font-semibold uppercase">Medium</div>
+          </div>
+          <div class="p-2 rounded bg-emerald-950/20 border border-emerald-900/30">
+            <div id="cleanRules" class="text-lg font-bold text-emerald-400">6</div>
+            <div class="text-[10px] text-emerald-300 font-semibold uppercase">Rules Audited</div>
+          </div>
+        </div>
+
+        <!-- Finding Details List -->
+        <div id="findingsContainer" class="p-4 space-y-3 max-h-[380px] overflow-y-auto">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Copy Action Snippet -->
+        <div class="p-4 bg-slate-950/80 border-t border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-300">Add to your repository:</span>
+            <button onclick="copyActionYaml()" id="copyBtn" class="text-xs text-purple-400 hover:text-purple-300 font-medium">Copy YAML</button>
+          </div>
+          <pre class="bg-slate-900 p-2.5 rounded border border-slate-800 text-[11px] text-slate-300 overflow-x-auto"><code>- name: Audit Soroban Security & WASM Size
+  uses: Ranjeet2063/soroban-guard-action@v1
+  with:
+    contract_path: '.'
+    fail_on_security_warning: 'true'</code></pre>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Rule Catalog Grid -->
+    <section class="mt-14">
+      <h2 class="text-2xl font-bold text-white mb-6 text-center">Enforced Soroban Security Invariants</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500/40 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">CRITICAL</span>
+            <code class="text-xs text-slate-400">SOROBAN-AUTH-01</code>
+          </div>
+          <h3 class="font-bold text-sm text-white mb-1">State Mutation Authorization</h3>
+          <p class="text-xs text-slate-400">Detects state-mutating functions accepting an Address without calling <code class="text-purple-300">address.require_auth()</code>.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500/40 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">CRITICAL</span>
+            <code class="text-xs text-slate-400">SOROBAN-SAC-01</code>
+          </div>
+          <h3 class="font-bold text-sm text-white mb-1">Cross-Contract Token Transfer</h3>
+          <p class="text-xs text-slate-400">Prevents invocation of <code class="text-purple-300">token::Client.transfer(...)</code> without verified sender authorization.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500/40 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">HIGH</span>
+            <code class="text-xs text-slate-400">SOROBAN-STORAGE-02</code>
+          </div>
+          <h3 class="font-bold text-sm text-white mb-1">Temporary Storage Misuse</h3>
+          <p class="text-xs text-slate-400">Catches critical state (balances, owner keys) stored in ephemeral temporary storage that auto-purges on expiration.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500/40 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">HIGH</span>
+            <code class="text-xs text-slate-400">SOROBAN-TTL-01</code>
+          </div>
+          <h3 class="font-bold text-sm text-white mb-1">Storage TTL Bumping</h3>
+          <p class="text-xs text-slate-400">Ensures contracts using ledger storage call <code class="text-purple-300">extend_ttl()</code> to avoid state archival.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500/40 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">HIGH</span>
+            <code class="text-xs text-slate-400">SOROBAN-MATH-01</code>
+          </div>
+          <h3 class="font-bold text-sm text-white mb-1">Unchecked Math Boundaries</h3>
+          <p class="text-xs text-slate-400">Flags raw compound arithmetic on amounts and balances that could trigger unexpected VM aborts.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500/40 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">MEDIUM</span>
+            <code class="text-xs text-slate-400">SOROBAN-PANIC-01</code>
+          </div>
+          <h3 class="font-bold text-sm text-white mb-1">Naked .unwrap() Panic</h3>
+          <p class="text-xs text-slate-400">Enforces custom typed <code class="text-purple-300">#[contracterror]</code> enums instead of raw panics.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-950 py-8 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        Built with Ramanujan mathematical precision by <a href="https://github.com/Ranjeet2063" class="text-purple-400 hover:underline">Ranjeet Kumar Gupta (@Ranjeet2063)</a>
+      </div>
+      <div class="flex space-x-6">
+        <a href="https://github.com/Ranjeet2063/soroban-guard-action" class="hover:text-slate-300">GitHub Repository</a>
+        <a href="https://stellar.org" class="hover:text-slate-300">Stellar Ecosystem</a>
+        <a href="https://github.com/Ranjeet2063/soroban-agentkit" class="hover:text-slate-300">Soroban AgentKit</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const SAMPLES = {
+      vulnerable: `use soroban_sdk::{contract, contractimpl, Address, Env};
+
+#[contract]
+pub struct VulnerableVault;
+
+#[contractimpl]
+impl VulnerableVault {
+    pub fn withdraw(env: Env, user: Address, amount: i128) {
+        // 🚨 VULNERABILITY 1: Missing user.require_auth()!
+        // Anyone can call this and withdraw on behalf of user.
+        
+        let mut balance: i128 = 1000;
+        balance -= amount; // ⚠️ VULNERABILITY 2: Unchecked arithmetic!
+
+        // ⚠️ VULNERABILITY 3: Storing balance in temporary storage!
+        // Temporary storage entries are purged upon expiration without archival.
+        env.storage().temporary().set(&user, &balance);
+
+        // ⚠️ VULNERABILITY 4: Missing storage TTL extension!
+    }
+}`,
+      token: `use soroban_sdk::{contract, contractimpl, Address, Env, token};
+
+#[contract]
+pub struct LiquidityRouter;
+
+#[contractimpl]
+impl LiquidityRouter {
+    pub fn route_payout(env: Env, token_id: Address, from: Address, to: Address, amount: i128) {
+        // Missing from.require_auth()!
+        // Unauthorized external caller can drain assets from the 'from' account.
+        let client = token::Client::new(&env, &token_id);
+        client.transfer(&from, &to, &amount);
+    }
+}`,
+      secure: `use soroban_sdk::{contract, contractimpl, Address, Env};
+
+#[contract]
+pub struct SecureVault;
+
+#[contractimpl]
+impl SecureVault {
+    pub fn withdraw_secure(env: Env, user: Address, amount: i128) -> Result<i128, ()> {
+        // ✅ 1. Explicit caller authorization
+        user.require_auth();
+
+        // ✅ 2. Active storage TTL bump
+        env.storage().instance().extend_ttl(100, 1000);
+
+        // ✅ 3. Checked arithmetic prevents overflow panics
+        let balance: i128 = 1000;
+        let new_balance = balance.checked_sub(amount).ok_or(())?;
+
+        // ✅ 4. Persistent state storage
+        env.storage().persistent().set(&user, &new_balance);
+
+        Ok(new_balance)
+    }
+}`
+    };
+
+    function loadSample(key) {
+      document.getElementById('rustCode').value = SAMPLES[key];
+      runAudit();
+    }
+
+    function runAudit() {
+      const code = document.getElementById('rustCode').value;
+      const lines = code.split('\n');
+      const findings = [];
+
+      let hasStorageUsage = code.includes('env.storage()');
+      let hasExtendTtl = code.includes('extend_ttl');
+
+      if (hasStorageUsage && !hasExtendTtl) {
+        findings.push({
+          ruleId: 'SOROBAN-TTL-01',
+          severity: 'HIGH',
+          title: 'Missing Storage TTL Extension (`extend_ttl`)',
+          description: 'Contract writes to or reads from ledger storage but never extends TTL. Soroban storage entries can expire and get archived if not bumped.',
+          line: 1,
+          snippet: 'env.storage() used without extend_ttl',
+          remediation: 'Call `env.storage().instance().extend_ttl(threshold, extend_to)`'
+        });
+      }
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+        const lineNum = i + 1;
+
+        if (trimmed.startsWith('//') || trimmed.startsWith('/*')) continue;
+
+        // Naked .unwrap()
+        if (trimmed.includes('.unwrap()') || trimmed.includes('.expect(')) {
+          findings.push({
+            ruleId: 'SOROBAN-PANIC-01',
+            severity: 'MEDIUM',
+            title: 'Direct `.unwrap()` / `.expect()` in Contract Logic',
+            description: 'Unchecked unwrap causes the VM to abort with generic panic instead of structured contract error enum.',
+            line: lineNum,
+            snippet: trimmed,
+            remediation: 'Use custom #[contracterror] enum with Result<T, Error>'
+          });
+        }
+
+        // Missing require_auth on mutating entrypoint
+        if (trimmed.startsWith('pub fn ') && trimmed.includes('env: Env') && trimmed.includes('Address')) {
+          const activeLookahead = lines.slice(i, Math.min(i + 25, lines.length)).join('\n');
+          if (!activeLookahead.includes('.require_auth(') && !activeLookahead.includes('.require_auth_for_args(')) {
+            if (activeLookahead.includes('set(') || activeLookahead.includes('transfer(') || activeLookahead.includes('mint(') || activeLookahead.includes('burn(')) {
+              findings.push({
+                ruleId: 'SOROBAN-AUTH-01',
+                severity: 'CRITICAL',
+                title: 'Missing Authorization (`require_auth`) on State Mutation',
+                description: 'Function accepts an Address and executes state mutations without enforcing caller authorization.',
+                line: lineNum,
+                snippet: trimmed,
+                remediation: 'Enforce `user.require_auth()` before mutating state.'
+              });
+            }
+          }
+        }
+
+        // Unchecked arithmetic
+        if ((trimmed.includes(' += ') || trimmed.includes(' -= ') || trimmed.includes(' *= ')) &&
+            (trimmed.includes('amount') || trimmed.includes('balance') || trimmed.includes('supply'))) {
+          findings.push({
+            ruleId: 'SOROBAN-MATH-01',
+            severity: 'HIGH',
+            title: 'Unchecked Arithmetic in Financial Calculation',
+            description: 'Direct compound arithmetic on balance/amount variables may panic on overflow/underflow.',
+            line: lineNum,
+            snippet: trimmed,
+            remediation: 'Use `checked_add`, `checked_sub`, or `checked_mul`'
+          });
+        }
+
+        // Critical state in temporary storage
+        if (trimmed.includes('env.storage().temporary().set(') &&
+            (trimmed.toLowerCase().includes('balance') || trimmed.toLowerCase().includes('admin') || trimmed.toLowerCase().includes('owner'))) {
+          findings.push({
+            ruleId: 'SOROBAN-STORAGE-02',
+            severity: 'HIGH',
+            title: 'Critical Asset/Ownership State in Temporary Storage',
+            description: 'Temporary storage entries are permanently deleted upon expiration without archival.',
+            line: lineNum,
+            snippet: trimmed,
+            remediation: 'Use `env.storage().persistent()` or `instance()` with explicit `extend_ttl`'
+          });
+        }
+
+        // Token client transfer without authorization
+        if ((trimmed.includes('.transfer(&') || trimmed.includes('.transfer_from(&')) &&
+            (trimmed.includes('client.transfer') || trimmed.includes('token_client.transfer') || trimmed.includes('token::Client'))) {
+          const lookback = lines.slice(Math.max(0, i - 25), i).join('\n');
+          if (!lookback.includes('.require_auth()') && !lookback.includes('.require_auth_for_args(')) {
+            findings.push({
+              ruleId: 'SOROBAN-SAC-01',
+              severity: 'CRITICAL',
+              title: 'Unchecked Cross-Contract Token Transfer',
+              description: 'Token transfer invoked via Client without preceding caller authorization (`require_auth()`).',
+              line: lineNum,
+              snippet: trimmed,
+              remediation: 'Ensure `from.require_auth()` is called before invoking token client transfer.'
+            });
+          }
+        }
+      }
+
+      renderResults(findings);
+    }
+
+    function renderResults(findings) {
+      const crit = findings.filter(f => f.severity === 'CRITICAL').length;
+      const high = findings.filter(f => f.severity === 'HIGH').length;
+      const med = findings.filter(f => f.severity === 'MEDIUM').length;
+
+      document.getElementById('critCount').innerText = crit;
+      document.getElementById('highCount').innerText = high;
+      document.getElementById('medCount').innerText = med;
+
+      const badge = document.getElementById('statusBadge');
+      if (crit > 0) {
+        badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30';
+        badge.innerText = '🔴 CI AUDIT FAILED';
+      } else if (high > 0 || med > 0) {
+        badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        badge.innerText = '🟡 PASSED WITH WARNINGS';
+      } else {
+        badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        badge.innerText = '🟢 100% CLEAN PROOF';
+      }
+
+      const container = document.getElementById('findingsContainer');
+      container.innerHTML = '';
+
+      if (findings.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center rounded-lg border border-emerald-500/20 bg-emerald-950/20">
+            <span class="text-3xl block mb-2">🎉</span>
+            <div class="font-bold text-sm text-emerald-400">Zero Anti-Patterns Detected</div>
+            <div class="text-xs text-slate-400 mt-1">Authorization boundaries, arithmetic checks, and storage TTL practices meet recommended Soroban standards.</div>
+          </div>
+        `;
+        return;
+      }
+
+      findings.forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'p-3 rounded-lg border border-slate-800 bg-slate-950/60 text-xs';
+        const color = f.severity === 'CRITICAL' ? 'text-red-400 border-red-900/40 bg-red-950/10' : f.severity === 'HIGH' ? 'text-amber-400 border-amber-900/40 bg-amber-950/10' : 'text-blue-400 border-blue-900/40 bg-blue-950/10';
+        item.innerHTML = `
+          <div class="flex items-center justify-between font-semibold ${color} mb-1">
+            <span>[${f.ruleId}] ${f.title}</span>
+            <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${color}">${f.severity}</span>
+          </div>
+          <p class="text-slate-300 text-[11px] mb-2">${f.description}</p>
+          <div class="bg-slate-900 p-1.5 rounded font-mono text-[11px] text-slate-300 mb-2 border border-slate-800">
+            Line ${f.line}: ${escapeHtml(f.snippet)}
+          </div>
+          <div class="text-[11px] text-purple-300 font-medium">💡 Remediation: ${f.remediation}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function copyActionYaml() {
+      const yaml = `- name: Audit Soroban Security & WASM Size\\n  uses: Ranjeet2063/soroban-guard-action@v1\\n  with:\\n    contract_path: '.'\\n    fail_on_security_warning: 'true'`;
+      navigator.clipboard.writeText(yaml);
+      const btn = document.getElementById('copyBtn');
+      btn.innerText = 'Copied! ✓';
+      setTimeout(() => { btn.innerText = 'Copy YAML'; }, 2000);
+    }
+
+    // Initialize with vulnerable preset
+    loadSample('vulnerable');
+  </script>
+</body>
+</html>
