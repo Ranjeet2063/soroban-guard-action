@@ -6,7 +6,7 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.js"
+    "build": "node init && esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.js"
   },
   "keywords": [
     "soroban",
@@ -21,7 +21,9 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^3.0.1",
-    "@actions/github": "^9.1.1"
+    "@actions/github": "^9.1.1",
+    "dotenv": "^8.2.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

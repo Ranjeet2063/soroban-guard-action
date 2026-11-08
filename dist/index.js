@@ -20684,7 +20684,12 @@ ${item.snippet}
   }
   md += `---
 `;
-  md += `*Report generated automatically by [Soroban Guard](https://github.com/marketplace) \u2022 Stellar Smart Contract Quality Assurance*
+  md += `*Report generated automatically by [Soroban Guard](https://github.com/marketplace/actions/soroban-guard-smart-contract-security-gas-ci) \u2022 Stellar Smart Contract Quality Assurance*
+
+`;
+  md += `> \u{1F6E1}\uFE0F **Need automated audit PDF certificates, historical gas trends, and multi-contract security dashboards?**  
+`;
+  md += `> [**Unlock SentinelGuard Cloud Pro on GitHub Marketplace \u2192**](https://github.com/Ranjeet2063/sentinelguard-saas)
 `;
   return md;
 }

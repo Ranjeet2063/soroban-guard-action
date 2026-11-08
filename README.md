@@ -2,8 +2,9 @@
 
 > **The Automated Smart Contract Security, Gas & WASM Budget Auditor for Stellar Soroban.**
 
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Soroban%20Guard-blueviolet?logo=github)](https://github.com/marketplace)
-[![CI Tests](https://img.shields.io/badge/tests-100%25%20passing-brightgreen)](https://github.com/marketplace)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Soroban%20Guard-blueviolet?logo=github)](https://github.com/marketplace/actions/soroban-guard-smart-contract-security-gas-ci)
+[![Release](https://img.shields.io/github/v/release/Ranjeet2063/soroban-guard-action?color=blue)](https://github.com/Ranjeet2063/soroban-guard-action/releases/latest)
+[![CI Tests](https://img.shields.io/badge/tests-100%25%20passing-brightgreen)](https://github.com/Ranjeet2063/soroban-guard-action/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Built for Stellar Soroban](https://img.shields.io/badge/Stellar-Soroban-black)](https://stellar.org)
 
@@ -142,6 +143,24 @@ Whenever a PR is opened, Soroban Guard leaves a clear audit comment:
 
 > ✅ Zero anti-patterns detected. Authorization, arithmetic checks, and storage TTL practices meet recommended Soroban standards.
 ```
+
+---
+
+## 💎 SentinelGuard Cloud Pro & Enterprise Plans
+
+Need automated PDF compliance reports, historical gas regression analytics, and team management? Unlock **SentinelGuard Cloud**:
+
+| Feature | Open-Source Action (Free) | Pro Cloud ($19/mo) | Enterprise ($49/mo) |
+| :--- | :---: | :---: | :---: |
+| **Local CI Static Analysis** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **WASM Bytecode & Size Budgeting** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **PR Comment Verification** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Automated PDF Audit Certificates** | ❌ | ✅ Yes | ✅ Yes |
+| **Historical Gas & Memory Trends** | ❌ | ✅ Yes | ✅ Yes |
+| **Multi-Contract Team Dashboard** | ❌ | Up to 10 repos | Unlimited |
+| **Priority Stellar Protocol SLA** | ❌ | Standard | 24/7 Dedicated |
+
+👉 [**Get Started with SentinelGuard Cloud Pro on GitHub Marketplace →**](https://github.com/Ranjeet2063/sentinelguard-saas)
 
 ---
 
